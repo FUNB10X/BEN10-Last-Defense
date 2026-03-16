@@ -1,0 +1,44 @@
+name: BEN10 Last Defense Build
+
+on: [push]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+        
+      - name: Install dependencies
+        run: pip install pygame pyinstaller numpy
+        
+      - name: Build with PyInstaller
+        shell: bash
+        run: |
+          # ตั้งชื่อโฟลเดอร์ต้นทาง
+          DIR="Ben10 Last Defense (Antigravity Edition 2)"
+          
+          # ใช้คำสั่ง PyInstaller พร้อมแพ็กไฟล์ฟอนต์และเพลงทั้งหมด
+          # หมายเหตุ: ใช้ : เป็นตัวคั่น (PyInstaller บน GitHub Actions รองรับแบบนี้ทั้งคู่)
+          pyinstaller --windowed --name="BEN10_LastDefense" \
+          --add-data "$DIR/Anakotmai-Bold.ttf:." \
+          --add-data "$DIR/Anakotmai-Medium.ttf:." \
+          --add-data "$DIR/Finale.mp3:." \
+          --add-data "$DIR/b10mainmenu.mp3:." \
+          --add-data "$DIR/b10mainmenu.wav:." \
+          --add-data "$DIR/b10mainmenu_slow.wav:." \
+          --add-data "ben10_defense:ben10_defense" \
+          "$DIR/main.py"
+        
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: BEN10-LastDefense-${{ matrix.os }}
+          path: dist/
