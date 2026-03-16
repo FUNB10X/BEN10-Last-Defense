@@ -1,0 +1,31 @@
+name: BEN10 Last Defense Build
+
+on: [push] 
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+        
+      - name: Install dependencies
+        run: pip install pygame pyinstaller
+        
+      - name: Build with PyInstaller
+        # ชื่อไฟล์ที่จะได้ออกมาจะเป็น BEN10_LastDefense
+        run: pyinstaller --windowed --name="BEN10_LastDefense" main.py
+        
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          # ชื่อโฟลเดอร์เวลาโหลดจากหน้าเว็บ
+          name: BEN10-LastDefense-${{ matrix.os }}
+          path: dist/
