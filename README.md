@@ -1,13 +1,6 @@
 # BEN10-Last-Defense
-[TH]
-ก่อนเริ่มเล่นเกมนี้ โปรด ดาว์โหลด Python / Pygame และ NumPy ให้เรียบร้อยก่อนนะครับ
-
-[EN]
-before playing this game please download Python / Pygame and Numpy first.
-
-Pygame : จําเป็น (Must Download)
-Pynum : โหลดเพื่อประสบการณ์ที่ดีที่สุด (For Best Experience (Sound Effect))
-
+เกม Tower Defense (ปกป้องฐาน) ธีม Ben10
+ลิงค์ดาว์โหลด : https://github.com/FUNB10X/BEN10-Last-Defense/releases/tag/FUNB10X
 
 |--- เกมนี้สร้างภายในเวลาไม่ถึง 24 ชั่วโมง และ สร้างในกิจกรรม Intelligence Camp by Hamsterhub ---|
 
