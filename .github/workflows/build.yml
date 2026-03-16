@@ -20,12 +20,11 @@ jobs:
         run: pip install pygame pyinstaller
         
       - name: Build with PyInstaller
-        # ชื่อไฟล์ที่จะได้ออกมาจะเป็น BEN10_LastDefense
-        run: pyinstaller --windowed --name="BEN10_LastDefense" main.py
+        # แก้ตรงนี้: เปลี่ยน Path ให้ชี้เข้าไปในโฟลเดอร์เกมของคุณ
+        run: pyinstaller --windowed --name="BEN10_LastDefense" "Ben10 Last Defense (Antigravity Edition 2)/main.py"
         
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          # ชื่อโฟลเดอร์เวลาโหลดจากหน้าเว็บ
           name: BEN10-LastDefense-${{ matrix.os }}
-          path: dist/
+          path: "Ben10 Last Defense (Antigravity Edition 2)/dist/"
