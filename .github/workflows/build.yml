@@ -1,44 +1,84 @@
-name: BEN10 Last Defense Build
+name: BEN10 Last Defense CI
 
-on: [push]
+on:
+  push:
+  workflow_dispatch:
 
 jobs:
   build:
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [windows-latest, macos-latest, ubuntu-latest]
+
     runs-on: ${{ matrix.os }}
-    
+
     steps:
-      - uses: actions/checkout@v4
-      
-      - uses: actions/setup-python@v5
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
-        
-      - name: Install dependencies
-        run: pip install pygame pyinstaller numpy
-        
-      - name: Build with PyInstaller
+          python-version: "3.9.x"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pygame numpy pyinstaller
+
+      - name: Debug File Tree
+        run: |
+          echo "Repository structure:"
+          ls -R
+
+      - name: Build Game
         shell: bash
-        run:
+        run: |
           DIR="Ben10 Last Defense (Antigravity Edition 2)"
-          
           cd "$DIR"
 
-          pyinstaller --windowed --name="BEN10_LastDefense" \
-          --add-data "Anakotmai-Bold.ttf:." \
-          --add-data "Anakotmai-Medium.ttf:." \
-          --add-data "Finale.mp3:." \
-          --add-data "b10mainmenu.mp3:." \
-          --add-data "b10mainmenu.wav:." \
-          --add-data "b10mainmenu_slow.wav:." \
-          --add-data "ben10_defense:ben10_defense" \
-          "main.py"
-        
-      - name: Upload Build Artifacts
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            SEP=";"
+          else
+            SEP=":"
+          fi
+
+          pyinstaller \
+          --windowed \
+          --onefile \
+          --name="BEN10_LastDefense" \
+          --add-data "Anakotmai-Bold.ttf${SEP}." \
+          --add-data "Anakotmai-Medium.ttf${SEP}." \
+          --add-data "Finale.mp3${SEP}." \
+          --add-data "b10mainmenu.mp3${SEP}." \
+          --add-data "b10mainmenu.wav${SEP}." \
+          --add-data "b10mainmenu_slow.wav${SEP}." \
+          --add-data "ben10_defense${SEP}ben10_defense" \
+          main.py
+
+      - name: Zip Build
+        shell: bash
+        run: |
+          DIR="Ben10 Last Defense (Antigravity Edition 2)"
+          cd "$DIR/dist"
+
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            zip -r BEN10_LastDefense_windows.zip .
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+            zip -r BEN10_LastDefense_macos.zip .
+          else
+            zip -r BEN10_LastDefense_linux.zip .
+          fi
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: BEN10-LastDefense-${{ matrix.os }}
-          # ชี้ไปที่โฟลเดอร์ dist ที่อยู่ใน DIR
-          path: "Ben10 Last Defense (Antigravity Edition 2)/dist/"
+          name: BEN10_LastDefense-${{ matrix.os }}
+          path: Ben10 Last Defense (Antigravity Edition 2)/dist/
