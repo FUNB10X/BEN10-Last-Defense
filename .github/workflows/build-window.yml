@@ -1,0 +1,86 @@
+name: BEN10 Windows Build
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.9"
+
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~\AppData\Local\pip\Cache
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pygame numpy pyinstaller
+
+    - name: Build Game
+      shell: bash
+      run: |
+        DIR="Ben10 Last Defense (Antigravity Edition 2)"
+        cd "$DIR"
+
+        pyinstaller \
+        --noconfirm \
+        --clean \
+        --windowed \
+        --onefile \
+        --name="BEN10_LastDefense" \
+        --add-data "Anakotmai-Bold.ttf;." \
+        --add-data "Anakotmai-Medium.ttf;." \
+        --add-data "Finale.mp3;." \
+        --add-data "b10mainmenu.mp3;." \
+        --add-data "b10mainmenu.wav;." \
+        --add-data "b10mainmenu_slow.wav;." \
+        --add-data "ben10_defense;ben10_defense" \
+        main.py
+
+    - name: Prepare Release Folder
+      shell: powershell
+      run: |
+        New-Item -ItemType Directory -Force -Path release
+        Copy-Item "Ben10 Last Defense (Antigravity Edition 2)\dist\BEN10_LastDefense.exe" release\
+        Copy-Item "Ben10 Last Defense (Antigravity Edition 2)\Anakotmai-Bold.ttf" release\
+        Copy-Item "Ben10 Last Defense (Antigravity Edition 2)\Anakotmai-Medium.ttf" release\
+        Copy-Item "Ben10 Last Defense (Antigravity Edition 2)\Finale.mp3" release\
+        Copy-Item "Ben10 Last Defense (Antigravity Edition 2)\b10mainmenu.mp3" release\
+        Copy-Item "Ben10 Last Defense (Antigravity Edition 2)\b10mainmenu.wav" release\
+        Copy-Item "Ben10 Last Defense (Antigravity Edition 2)\b10mainmenu_slow.wav" release\
+        Copy-Item -Recurse "Ben10 Last Defense (Antigravity Edition 2)\ben10_defense" release\
+
+    - name: Zip Build
+      shell: powershell
+      run: |
+        Compress-Archive -Path release\* -DestinationPath BEN10_LastDefense_windows.zip
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: BEN10_LastDefense_windows
+        path: BEN10_LastDefense_windows.zip
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: build-${{ github.run_number }}
+        name: BEN10 Last Defense Build ${{ github.run_number }}
+        files: BEN10_LastDefense_windows.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
