@@ -3,7 +3,17 @@ sound.py — Procedural SFX + external BGM playback.
 Depends on: config (for pygame being init'd), optionally numpy.
 """
 import os as _os
+import sys
 import pygame
+
+# ฟังก์ชันช่วยหา Path สำหรับ PyInstaller
+def resource_path(relative_path):
+    try:
+        # PyInstaller สร้างโฟลเดอร์ชั่วคราวและเก็บ path ไว้ใน _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = _os.path.abspath(".")
+    return _os.path.join(base_path, relative_path)
 
 try:
     import numpy as np
@@ -78,8 +88,13 @@ def play_music(name, vol=0.42):
         pygame.mixer.music.set_volume(v)
         return
     stop_music()
+    
+    # กำหนดแมพชื่อเพลงกับไฟล์จริง (ใช้ resource_path ครอบทุกชื่อไฟล์)
     if name == 'menu_bgm':
-        fname = 'b10mainmenu.wav' if _os.path.exists('b10mainmenu.wav') else 'b10mainmenu.mp3'
+        # เช็คทั้ง wav และ mp3 ผ่าน resource_path
+        f_wav = resource_path('b10mainmenu.wav')
+        f_mp3 = resource_path('b10mainmenu.mp3')
+        fname = f_wav if _os.path.exists(f_wav) else f_mp3
         if _os.path.exists(fname):
             try:
                 pygame.mixer.music.load(fname)
@@ -89,7 +104,9 @@ def play_music(name, vol=0.42):
             except Exception as e: print(f"Music error ({fname}):", e)
 
     if name == 'boss_bgm':
-        fname = 'Finale.wav' if _os.path.exists('Finale.wav') else 'Finale.mp3'
+        f_wav = resource_path('Finale.wav')
+        f_mp3 = resource_path('Finale.mp3')
+        fname = f_wav if _os.path.exists(f_wav) else f_mp3
         if _os.path.exists(fname):
             try:
                 pygame.mixer.music.load(fname)
@@ -99,7 +116,9 @@ def play_music(name, vol=0.42):
             except Exception as e: print(f"Music error ({fname}):", e)
 
     if name == 'bgm':
-        fname = 'b10mainmenu_slow.wav' if _os.path.exists('b10mainmenu_slow.wav') else 'b10mainmenu_slow.mp3'
+        f_wav = resource_path('b10mainmenu_slow.wav')
+        f_mp3 = resource_path('b10mainmenu_slow.mp3')
+        fname = f_wav if _os.path.exists(f_wav) else f_mp3
         if _os.path.exists(fname):
             try:
                 pygame.mixer.music.load(fname)
@@ -108,8 +127,8 @@ def play_music(name, vol=0.42):
                 _cur_mus[0] = name; return
             except Exception as e: print(f"Music error ({fname}):", e)
 
-    # Fallback: try <name>.wav
-    fname = f"{name}.wav" if not name.endswith('.wav') else name
+    # Fallback: ลองหา <name>.wav ตรงๆ
+    fname = resource_path(f"{name}.wav" if not name.endswith('.wav') else name)
     if _os.path.exists(fname):
         try:
             pygame.mixer.music.load(fname)
@@ -130,7 +149,7 @@ def update_music_volume(vol=0.42):
 def sfx(name, vol=0.18):
     """Play a sound effect by name (cached after first lookup)."""
     if name not in _sfx_cache:
-        fname = f"sfx_{name}.wav"
+        fname = resource_path(f"sfx_{name}.wav")
         if _os.path.exists(fname):
             try: _sfx_cache[name] = pygame.mixer.Sound(fname)
             except Exception: pass
