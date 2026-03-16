@@ -1,0 +1,15 @@
+name: Build Mac
+on: [push]
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.9'}
+      - run: pip install pygame pyinstaller
+      - run: pyinstaller --windowed --name="BEN10_LastDefense" "Ben10 Last Defense (Antigravity Edition 2)/main.py"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BEN10-Mac-Build
+          path: dist/
